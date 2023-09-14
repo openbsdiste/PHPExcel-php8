@@ -153,7 +153,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
     const MS_BIFF_CRYPTO_NONE           = 0;
     const MS_BIFF_CRYPTO_XOR            = 1;
     const MS_BIFF_CRYPTO_RC4            = 2;
-    
+
     // Size of stream blocks when using RC4 encryption
     const REKEY_BLOCK                   = 0x400;
 
@@ -382,7 +382,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
      * @var int
      */
     private $encryption = 0;
-    
+
     /**
      * The position in the stream after which contents are encrypted
      *
@@ -1221,7 +1221,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
 
         return $this->phpExcel;
     }
-    
+
     /**
      * Read record data from stream, decrypting as required
      *
@@ -1234,12 +1234,12 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
     private function readRecordData($data, $pos, $len)
     {
         $data = substr($data, $pos, $len);
-        
+
         // File not encrypted, or record before encryption start point
         if ($this->encryption == self::MS_BIFF_CRYPTO_NONE || $pos < $this->encryptionStartPos) {
             return $data;
         }
-    
+
         $recordData = '';
         if ($this->encryption == self::MS_BIFF_CRYPTO_RC4) {
             $oldBlock = floor($this->rc4Pos / self::REKEY_BLOCK);
@@ -1748,16 +1748,16 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
         if ($length != 54) {
             throw new PHPExcel_Reader_Exception('Unexpected file pass record length');
         }
-        
+
         $recordData = $this->readRecordData($this->data, $this->pos + 4, $length);
-        
+
         // move stream pointer to next record
         $this->pos += 4 + $length;
 
         if (!$this->verifyPassword('VelvetSweatshop', substr($recordData, 6, 16), substr($recordData, 22, 16), substr($recordData, 38, 16), $this->md5Ctxt)) {
             throw new PHPExcel_Reader_Exception('Decryption password incorrect');
         }
-        
+
         $this->encryption = self::MS_BIFF_CRYPTO_RC4;
 
         // Decryption required from the record after next onwards
@@ -1779,7 +1779,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
         for ($i = 0; $i < 5; $i++) {
             $pwarray[$i] = $valContext[$i];
         }
-        
+
         $pwarray[5] = chr($block & 0xff);
         $pwarray[6] = chr(($block >> 8) & 0xff);
         $pwarray[7] = chr(($block >> 16) & 0xff);
@@ -1868,7 +1868,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
 
         $salt = $key->RC4($salt_data);
         $hashedsalt = $key->RC4($hashedsalt_data);
-        
+
         $salt .= "\x80" . str_repeat("\0", 47);
         $salt[56] = "\x80";
 
@@ -2888,7 +2888,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
             $pos += 2;
 
             // option flags
-            $optionFlags = ord($recordData{$pos});
+            $optionFlags = ord($recordData[$pos]);
             ++$pos;
 
             // bit: 0; mask: 0x01; 0 = compressed; 1 = uncompressed
@@ -2955,7 +2955,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
 
                     // repeated option flags
                     // OpenOffice.org documentation 5.21
-                    $option = ord($recordData{$pos});
+                    $option = ord($recordData[$pos]);
                     ++$pos;
 
                     if ($isCompressed && ($option == 0)) {
@@ -2977,7 +2977,7 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                         // this fragment compressed
                         $len = min($charsLeft, $limitpos - $pos);
                         for ($j = 0; $j < $len; ++$j) {
-                            $retstr .= $recordData{$pos + $j} . chr(0);
+                            $retstr .= $recordData[$pos + $j] . chr(0);
                         }
                         $charsLeft -= $len;
                         $isCompressed = false;
@@ -4598,9 +4598,9 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
                 $hyperlinkType = 'UNC';
             } elseif (!$isFileLinkOrUrl) {
                 $hyperlinkType = 'workbook';
-            } elseif (ord($recordData{$offset}) == 0x03) {
+            } elseif (ord($recordData[$offset]) == 0x03) {
                 $hyperlinkType = 'local';
-            } elseif (ord($recordData{$offset}) == 0xE0) {
+            } elseif (ord($recordData[$offset]) == 0xE0) {
                 $hyperlinkType = 'URL';
             }
 
